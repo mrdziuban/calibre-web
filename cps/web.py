@@ -2916,7 +2916,7 @@ def edit_book(book_id):
     # Show form
     if request.method != 'POST':
         return render_title_template('book_edit.html', book=book, authors=author_names, cc=cc,
-                                     title=_(u"edit metadata"))
+                                     title=_(u"edit metadata"), goodreads_token=os.environ.get("GOODREADS_TOKEN"))
 
     # Update book
     edited_books_id = set()

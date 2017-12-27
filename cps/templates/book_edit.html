@@ -185,6 +185,9 @@
 
           <input type="checkbox" id="show-google" class="pill" data-control="google" checked>
           <label for="show-google">Google <span class="glyphicon glyphicon-ok"></span></label>
+
+          <input type="checkbox" id="show-goodreads" class="pill" data-control="goodreads" checked>
+          <label for="show-goodreads">Goodreads <span class="glyphicon glyphicon-ok"></span></label>
         </div>
 
         <div id="meta-info">
@@ -237,6 +240,7 @@
     'source': {{_('Source')|safe|tojson}},
   };
   var language = '{{ g.user.locale }}';
+  var goodreadsToken = '{{ goodreads_token }}';
 </script>
 <script src="{{ url_for('static', filename='js/libs/typeahead.bundle.js') }}"></script>
 <script src="{{ url_for('static', filename='js/libs/bootstrap-rating-input.min.js') }}"></script>

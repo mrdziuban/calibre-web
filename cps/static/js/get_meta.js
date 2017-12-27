@@ -80,7 +80,7 @@ if (goodreadsReady) {
         searchUrl: function (title) {
             var goodreadsUrl = "https://www.goodreads.com/search/index.xml?key=" +
                                 goodreadsToken + "&q=" + title.replace(/\s+/gm, "+");
-            return "http://query.yahooapis.com/v1/public/yql" +
+            return "https://query.yahooapis.com/v1/public/yql" +
                     "?q=" + encodeURIComponent("select * from xml where url='" + goodreadsUrl + "'") +
                     "&format=xml";
         },

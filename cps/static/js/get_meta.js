@@ -173,9 +173,6 @@ $(function () {
 
     function doSearch (keyword) {
         $("#meta-info").text(msg.loading);
-        if (!goodreadsReady) {
-            $('#show-goodreads, label[for="show-goodreads"]').remove();
-        }
         if (keyword) {
             Object.keys(apis).forEach(function(api) {
                 searchBook(keyword, api);

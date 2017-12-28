@@ -1092,10 +1092,18 @@ def get_matching_tags():
 @app.route('/page/<int:page>')
 @login_required_if_no_ano
 def index(page):
-    entries, random, pagination = fill_indexpage(page, db.Books, True, db.Books.timestamp.desc())
+    entries, random, pagination = fill_indexpage(page, db.Books, True, db.Books.author_sort)
     return render_title_template('index.html', random=random, entries=entries, pagination=pagination,
-                                 title=_(u"Recently Added Books"))
+                                 title=_(u"Books (Author A-Z)"), sort=['author', 'asc'])
 
+
+@app.route('/authors/z-a', defaults={'page': 1})
+@app.route('/authors/z-a/page/<int:page>')
+@login_required_if_no_ano
+def authors_descending(page):
+    entries, random, pagination = fill_indexpage(page, db.Books, True, db.Books.author_sort.desc())
+    return render_title_template('index.html', random=random, entries=entries, pagination=pagination,
+                                 title=_(u"Books (Author Z-A)"), sort=['author', 'desc'])
 
 @app.route('/books/newest', defaults={'page': 1})
 @app.route('/books/newest/page/<int:page>')
@@ -1104,7 +1112,7 @@ def newest_books(page):
     if current_user.show_sorted():
         entries, random, pagination = fill_indexpage(page, db.Books, True, db.Books.pubdate.desc())
         return render_title_template('index.html', random=random, entries=entries, pagination=pagination,
-                                     title=_(u"Newest Books"))
+                                     title=_(u"Newest Books"), sort=['pubdate', 'desc'])
     else:
         abort(404)
 
@@ -1116,7 +1124,7 @@ def oldest_books(page):
     if current_user.show_sorted():
         entries, random, pagination = fill_indexpage(page, db.Books, True, db.Books.pubdate)
         return render_title_template('index.html', random=random, entries=entries, pagination=pagination,
-                                     title=_(u"Oldest Books"))
+                                     title=_(u"Oldest Books"), sort=['pubdate', 'asc'])
     else:
         abort(404)
 
@@ -1128,7 +1136,7 @@ def titles_ascending(page):
     if current_user.show_sorted():
         entries, random, pagination = fill_indexpage(page, db.Books, True, db.Books.sort)
         return render_title_template('index.html', random=random, entries=entries, pagination=pagination,
-                                     title=_(u"Books (A-Z)"))
+                                     title=_(u"Books (A-Z)"), sort=['title', 'asc'])
     else:
         abort(404)
 
@@ -1139,8 +1147,16 @@ def titles_ascending(page):
 def titles_descending(page):
     entries, random, pagination = fill_indexpage(page, db.Books, True, db.Books.sort.desc())
     return render_title_template('index.html', random=random, entries=entries, pagination=pagination,
-                                 title=_(u"Books (Z-A)"))
+                                 title=_(u"Books (Z-A)"), sort=['title', 'desc'])
 
+
+@app.route('/recently-added', defaults={'page': 1})
+@app.route('/recently-added/page/<int:page>')
+@login_required_if_no_ano
+def recently_added(page):
+    entries, random, pagination = fill_indexpage(page, db.Books, True, db.Books.timestamp.desc())
+    return render_title_template('index.html', random=random, entries=entries, pagination=pagination,
+                                 title=_(u"Recently Added Books"), sort=['added', 'desc'])
 
 @app.route("/hot", defaults={'page': 1})
 @app.route('/hot/page/<int:page>')
@@ -1167,7 +1183,7 @@ def hot_books(page):
         numBooks = entries.__len__()
         pagination = Pagination(page, config.config_books_per_page, numBooks)
         return render_title_template('index.html', random=random, entries=entries, pagination=pagination,
-                                     title=_(u"Hot Books (most downloaded)"))
+                                     title=_(u"Hot Books (most downloaded)"), sort=['hot', 'desc'])
     else:
        abort(404)
 
@@ -1180,7 +1196,7 @@ def best_rated_books(page):
         entries, random, pagination = fill_indexpage(page, db.Books, db.Books.ratings.any(db.Ratings.rating > 9),
                                                      db.Books.timestamp.desc())
         return render_title_template('index.html', random=random, entries=entries, pagination=pagination,
-                                     title=_(u"Best rated books"))
+                                     title=_(u"Best rated books"), sort=['rating', 'desc'])
     abort(404)
 
 
@@ -1273,7 +1289,7 @@ def series(book_id, page):
     name = db.session.query(db.Series).filter(db.Series.id == book_id).first().name
     if entries:
         return render_title_template('index.html', random=random, pagination=pagination, entries=entries,
-                                     title=_(u"Series: %(serie)s", serie=name))
+                                     title=_(u"Series: %(serie)s", serie=name), sort=['series', 'asc'])
     else:
         flash(_(u"Error opening eBook. File does not exist or file is not accessible:"), category="error")
         return redirect(url_for("index"))
@@ -1323,7 +1339,7 @@ def language(name, page):
     except Exception:
         name = _(isoLanguages.get(part3=name).name)
     return render_title_template('index.html', random=random, entries=entries, pagination=pagination,
-                                 title=_(u"Language: %(name)s", name=name))
+                                 title=_(u"Language: %(name)s", name=name), sort=['language', 'asc'])
 
 
 @app.route("/category")
@@ -1347,7 +1363,7 @@ def category(book_id, page):
 
     name = db.session.query(db.Tags).filter(db.Tags.id == book_id).first().name
     return render_title_template('index.html', random=random, entries=entries, pagination=pagination,
-                                 title=_(u"Category: %(name)s", name=name))
+                                 title=_(u"Category: %(name)s", name=name), sort=['category', 'asc'])
 
 
 @app.route("/ajax/toggleread/<int:book_id>", methods=['POST'])
@@ -1834,7 +1850,7 @@ def render_read_books(page, are_read, as_xml=False):
             total_books = db.session.query(func.count(db.Books.id)).scalar()
             name = _(u'Unread Books') + ' (' + str(total_books - len(readBookIds)) + ')'
         return render_title_template('index.html', random=random, entries=entries, pagination=pagination,
-                                title=_(name, name=name))
+                                title=_(name, name=name), sort=['read', 'asc'])
 
 
 @app.route("/opds/readbooks/")

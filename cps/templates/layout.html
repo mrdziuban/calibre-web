@@ -114,19 +114,19 @@
                   <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
-                  {% if sort[0] == 'author' and sort[1] == 'asc' %}
+                  {% if sort is defined and sort[0] == 'author' and sort[1] == 'asc' %}
                   <li><a href="{{url_for('authors_descending')}}">{{_('Sort By')}} {{_('Author')}} ({{_('Descending')}})</a></li>
                   {% else %}
                   <li><a href="{{url_for('index')}}">{{_('Sort By')}} {{_('Author')}} ({{_('Ascending')}})</a></li>
                   {% endif %}
 
-                  {% if sort[0] == 'title' and sort[1] == 'asc' %}
+                  {% if sort is defined and sort[0] == 'title' and sort[1] == 'asc' %}
                   <li><a href="{{url_for('titles_descending')}}">{{_('Sort By')}} {{_('Title')}}  ({{_('Descending')}})</a></li>
                   {% else %}
                   <li><a href="{{url_for('titles_ascending')}}">{{_('Sort By')}} {{_('Title')}} ({{_('Ascending')}})</a></li>
                   {% endif %}
 
-                  {% if sort[0] == 'pubdate' and sort[1] == 'desc' %}
+                  {% if sort is defined and sort[0] == 'pubdate' and sort[1] == 'desc' %}
                   <li><a href="{{url_for('oldest_books')}}">{{_('Sort By')}} {{_('Oldest')}}</a></li>
                   {% else %}
                   <li><a href="{{url_for('newest_books')}}">{{_('Sort By')}} {{_('Newest')}}</a></li>

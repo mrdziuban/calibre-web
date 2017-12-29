@@ -626,7 +626,7 @@ def before_request():
     g.allow_registration = config.config_public_reg
     g.allow_upload = config.config_uploading
     g.public_shelfes = ub.session.query(ub.Shelf).filter(ub.Shelf.is_public == 1).order_by(ub.Shelf.name).all()
-    if not config.db_configured and request.endpoint not in ('basic_configuration', 'login') and '/static/' not in request.path:
+    if not config.db_configured and request.endpoint not in ('basic_configuration', 'login', 'refresh_db') and '/static/' not in request.path:
         return redirect(url_for('basic_configuration'))
 
 
@@ -1674,6 +1674,20 @@ def update():
     helper.updater_thread = helper.Updater()
     flash(_(u"Update done"), category="info")
     return abort(404)
+
+
+@app.route("/refresh-db")
+def refresh_db():
+    reload(db)
+
+    if config.db_configured:
+        db.session.close()
+        db.engine.dispose()
+
+    config.loadSettings()
+    db.setup_db()
+
+    return json.dumps({})
 
 
 @app.route("/search", methods=["GET"])

@@ -2369,7 +2369,7 @@ def show_not_shelf(shelf_id):
         all_books = db.session.query(db.Books).all()
         books_in_shelf = ub.session.query(ub.BookShelf).filter(ub.BookShelf.shelf == shelf_id).order_by(
             ub.BookShelf.order.asc()).all()
-        book_ids_in_shelf = map((lambda b: b.id), books_in_shelf)
+        book_ids_in_shelf = map((lambda b: b.book_id), books_in_shelf)
         for book in all_books:
             if book.id not in book_ids_in_shelf:
                 result.append(book)

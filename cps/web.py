@@ -2326,9 +2326,7 @@ def delete_shelf(shelf_id):
     return redirect(url_for('index'))
 
 
-@app.route("/shelf/<int:shelf_id>")
-@login_required_if_no_ano
-def show_shelf(shelf_id):
+def get_shelf(shelf_id):
     if current_user.is_anonymous:
         shelf = ub.session.query(ub.Shelf).filter(ub.Shelf.is_public == 1, ub.Shelf.id == shelf_id).first()
     else:
@@ -2336,6 +2334,19 @@ def show_shelf(shelf_id):
                                                                  ub.Shelf.id == shelf_id),
                                                          ub.and_(ub.Shelf.is_public == 1,
                                                                  ub.Shelf.id == shelf_id))).first()
+    return shelf
+
+def base_show_shelf(result, title, shelf):
+    return render_title_template('shelf.html', entries=result, title=title, shelf=shelf, viewing_shelf=shelf)
+
+def shelf_error():
+    flash(_(u"Error opening shelf. Shelf does not exist or is not accessible"), category="error")
+    return redirect(url_for("index"))
+
+@app.route("/shelf/<int:shelf_id>")
+@login_required_if_no_ano
+def show_shelf(shelf_id):
+    shelf = get_shelf(shelf_id)
     result = list()
     # user is allowed to access shelf
     if shelf:
@@ -2344,12 +2355,27 @@ def show_shelf(shelf_id):
         for book in books_in_shelf:
             cur_book = db.session.query(db.Books).filter(db.Books.id == book.book_id).first()
             result.append(cur_book)
-        return render_title_template('shelf.html', entries=result, title=_(u"Shelf: '%(name)s'", name=shelf.name),
-                                 shelf=shelf)
+        return base_show_shelf(result, _(u"Shelf: '%(name)s'", name=shelf.name), shelf)
     else:
-        flash(_(u"Error opening shelf. Shelf does not exist or is not accessible"), category="error")
-        return redirect(url_for("index"))
+        shelf_error()
 
+
+@app.route("/shelf/not/<int:shelf_id>")
+@login_required_if_no_ano
+def show_not_shelf(shelf_id):
+    shelf = get_shelf(shelf_id)
+    result = list()
+    if shelf:
+        all_books = db.session.query(db.Books).all()
+        books_in_shelf = ub.session.query(ub.BookShelf).filter(ub.BookShelf.shelf == shelf_id).order_by(
+            ub.BookShelf.order.asc()).all()
+        book_ids_in_shelf = map((lambda b: b.id), books_in_shelf)
+        for book in all_books:
+            if book.id not in book_ids_in_shelf:
+                result.append(book)
+        return base_show_shelf(result, _(u"Not on shelf: '%(name)s'", name=shelf.name), shelf)
+    else:
+        shelf_error()
 
 @app.route("/shelf/order/<int:shelf_id>", methods=["GET", "POST"])
 @login_required

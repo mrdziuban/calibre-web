@@ -170,7 +170,18 @@
                 {% endfor %}
                 <li class="nav-head hidden-xs">{{_('Your Shelves')}}</li>
                 {% for shelf in g.user.shelf %}
-                  <li><a href="{{url_for('show_shelf', shelf_id=shelf.id)}}"><span class="glyphicon glyphicon-list"></span> {{shelf.name}}</a></li>
+                  <li>
+                    {% if viewing_shelf is defined and viewing_shelf.id == shelf.id %}
+                    <a href="{{url_for('show_not_shelf', shelf_id=shelf.id)}}">
+                      <span class="glyphicon glyphicon-list"></span>
+                      {{shelf.name}} (not)
+                    {% else %}
+                    <a href="{{url_for('show_shelf', shelf_id=shelf.id)}}">
+                      <span class="glyphicon glyphicon-list"></span>
+                      {{shelf.name}}
+                    {% endif %}
+                    </a>
+                  </li>
                 {% endfor %}
               {% if not g.user.is_anonymous %}
                 <li id="nav_createshelf" class="create-shelf"><a href="{{url_for('create_shelf')}}">{{_('Create a Shelf')}}</a></li>

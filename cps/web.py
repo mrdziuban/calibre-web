@@ -2336,8 +2336,8 @@ def get_shelf(shelf_id):
                                                                  ub.Shelf.id == shelf_id))).first()
     return shelf
 
-def base_show_shelf(result, title, shelf):
-    return render_title_template('shelf.html', entries=result, title=title, shelf=shelf, viewing_shelf=shelf)
+def base_show_shelf(result, title, shelf, viewing_shelf):
+    return render_title_template('shelf.html', entries=result, title=title, shelf=shelf, viewing_shelf=viewing_shelf)
 
 def shelf_error():
     flash(_(u"Error opening shelf. Shelf does not exist or is not accessible"), category="error")
@@ -2355,7 +2355,7 @@ def show_shelf(shelf_id):
         for book in books_in_shelf:
             cur_book = db.session.query(db.Books).filter(db.Books.id == book.book_id).first()
             result.append(cur_book)
-        return base_show_shelf(result, _(u"Shelf: '%(name)s'", name=shelf.name), shelf)
+        return base_show_shelf(result, _(u"Shelf: '%(name)s'", name=shelf.name), shelf, shelf)
     else:
         shelf_error()
 
@@ -2373,7 +2373,7 @@ def show_not_shelf(shelf_id):
         for book in all_books:
             if book.id not in book_ids_in_shelf:
                 result.append(book)
-        return base_show_shelf(result, _(u"Not on shelf: '%(name)s'", name=shelf.name), shelf)
+        return base_show_shelf(result, _(u"Not on shelf: '%(name)s'", name=shelf.name), shelf, None)
     else:
         shelf_error()
 

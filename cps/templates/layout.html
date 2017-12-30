@@ -171,10 +171,10 @@
                 <li class="nav-head hidden-xs">{{_('Your Shelves')}}</li>
                 {% for shelf in g.user.shelf %}
                   <li>
-                    {% if viewing_shelf is defined and viewing_shelf.id == shelf.id %}
+                    {% if viewing_shelf is defined and viewing_shelf is not none and viewing_shelf.id == shelf.id %}
                     <a href="{{url_for('show_not_shelf', shelf_id=shelf.id)}}">
                       <span class="glyphicon glyphicon-list"></span>
-                      {{shelf.name}} (not)
+                      Not on {{shelf.name}}
                     {% else %}
                     <a href="{{url_for('show_shelf', shelf_id=shelf.id)}}">
                       <span class="glyphicon glyphicon-list"></span>

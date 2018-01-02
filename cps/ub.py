@@ -159,6 +159,7 @@ class User(UserBase, Base):
     role = Column(SmallInteger, default=ROLE_USER)
     password = Column(String)
     kindle_mail = Column(String(120), default="")
+    goodreads_user_id = Column(String(120), default="")
     shelf = relationship('Shelf', backref='user', lazy='dynamic', order_by='Shelf.name')
     downloads = relationship('Downloads', backref='user', lazy='dynamic')
     locale = Column(String(2), default="en")

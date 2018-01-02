@@ -77,9 +77,9 @@ import gdriveutils
 import tempfile
 import hashlib
 from redirect import redirect_back, is_safe_url
-
 from tornado import version as tornadoVersion
 from socket import error as SocketError
+from xml.etree import ElementTree
 
 try:
     from urllib.parse import quote
@@ -1366,6 +1366,53 @@ def category(book_id, page):
                                  title=_(u"Category: %(name)s", name=name), sort=['category', 'asc'])
 
 
+
+@app.route('/goodreads', defaults={'shelf': 'to-read'})
+@app.route('/goodreads/<shelf>')
+@login_required_if_no_ano
+def goodreads(shelf):
+    goodreads_token = os.environ.get("GOODREADS_TOKEN")
+    goodreads_user_id = current_user.goodreads_user_id
+
+    if goodreads_token is None or goodreads_user_id == '' or goodreads_user_id is None:
+        return abort(500)
+
+    all_books = db.session.query(db.Books).all()
+
+    goodreads_url = "https://www.goodreads.com/review/list?key={0}&id={1}&shelf={2}&per_page=200".format(
+                        goodreads_token, goodreads_user_id, shelf)
+    xml = ElementTree.fromstring(requests.get(goodreads_url).content)
+
+    words_to_ignore = ['-', 'a', 'an', 'and', 'for', 'of', 'the']
+    goodreads_books = [
+        {
+            'title': x.find('title').text,
+            'title_parts':
+                map(lambda x: x.lower(),
+                    filter(
+                        lambda x: x.lower() not in words_to_ignore,
+                        re.sub(r"(?i)([a-z]):.*", r"\1",
+                            re.sub(r"(?i)\([^\)]*\)", '',
+                                x.find('title').text)).strip().split(' '))),
+            'author': x.find('authors/author/name').text,
+            'image': x.find('image_url').text,
+            'rating': float(x.find('average_rating').text or 0),
+            'ratings': int(x.find('ratings_count').text or 0),
+            'link': x.find('link').text,
+            'pages': x.find('num_pages').text
+        } for x in xml.findall('books/book')
+    ]
+
+    books = [{
+        'goodreads_book': b,
+        'matching_books': filter(
+            lambda book: all(part in book.title.lower() for part in b['title_parts']),
+            all_books)
+    } for b in goodreads_books]
+
+    return render_title_template('goodreads.html', books=books, title=_(u"Goodreads books: %(shelf)s", shelf=shelf))
+
+
 @app.route("/ajax/toggleread/<int:book_id>", methods=['POST'])
 @login_required
 def toggle_read(book_id):
@@ -2435,6 +2482,8 @@ def profile():
                 content.password = generate_password_hash(to_save["password"])
         if "kindle_mail" in to_save and to_save["kindle_mail"] != content.kindle_mail:
             content.kindle_mail = to_save["kindle_mail"]
+        if "goodreads_user_id" in to_save and to_save["goodreads_user_id"] != content.goodreads_user_id:
+            content.goodreads_user_id = to_save["goodreads_user_id"]
         if to_save["email"] and to_save["email"] != content.email:
             content.email = to_save["email"]
         if "show_random" in to_save and to_save["show_random"] == "on":
@@ -2933,6 +2982,8 @@ def edit_user(user_id):
                 content.email = to_save["email"]
             if "kindle_mail" in to_save and to_save["kindle_mail"] != content.kindle_mail:
                 content.kindle_mail = to_save["kindle_mail"]
+            if "goodreads_user_id" in to_save and to_save["goodreads_user_id"] != content.goodreads_user_id:
+                content.goodreads_user_id = to_save["goodreads_user_id"]
         try:
             ub.session.commit()
             flash(_(u"User '%(nick)s' updated", nick=content.nickname), category="success")

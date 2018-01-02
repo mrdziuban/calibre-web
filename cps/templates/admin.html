@@ -8,6 +8,7 @@
         <th>{{_('Nickname')}}</th>
         <th>{{_('Email')}}</th>
         <th>{{_('Kindle')}}</th>
+        <th>{{_('Goodreads ID')}}</th>
         <th>{{_('DLS')}}</th>
         <th>{{_('Admin')}}</th>
         <th>{{_('Download')}}</th>
@@ -21,6 +22,7 @@
         <td><a href="{{url_for('edit_user', user_id=user.id)}}">{{user.nickname}}</a></td>
         <td>{{user.email}}</td>
         <td>{{user.kindle_mail}}</td>
+        <td>{{user.goodreads_user_id}}</td>
         <td>{{user.downloads.count()}}</td>
         <td>{% if user.role_admin() %}<span class="glyphicon glyphicon-ok"></span>{% else %}<span class="glyphicon glyphicon-remove"></span>{% endif %}</td>
         <td>{% if user.role_download() %}<span class="glyphicon glyphicon-ok"></span>{% else %}<span class="glyphicon glyphicon-remove"></span>{% endif %}</td>

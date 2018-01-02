@@ -24,6 +24,10 @@
       <input type="email" class="form-control" name="kindle_mail" id="kindle_mail" value="{{ content.kindle_mail if content.kindle_mail != None }}">
     </div>
     <div class="form-group">
+      <label for="goodreads_user_id">{{_('Goodreads ID')}}</label>
+      <input type="text" class="form-control" name="goodreads_user_id" id="goodreads_user_id" value="{{ content.goodreads_user_id if content.goodreads_user_id != None }}">
+    </div>
+    <div class="form-group">
     <label for="locale">{{_('Language')}}</label>
         <select name="locale" id="locale" class="form-control">
             {%  for translation in translations %}
@@ -92,7 +96,7 @@
     <div class="form-group">
       <input type="checkbox" name="admin_role" id="admin_role" {% if content.role_admin() %}checked{% endif %}>
       <label for="admin_role">{{_('Admin user')}}</label>
-    </div>  
+    </div>
     <div class="form-group">
         <input type="checkbox" name="show_mature_content" id="show_mature_content" {% if content.mature_content %}checked{% endif %}>
         <label for="show_mature_content">{{_('Show mature content')}}</label>

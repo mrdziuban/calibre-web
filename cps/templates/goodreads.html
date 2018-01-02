@@ -41,7 +41,7 @@
         <tbody>
           {% for x in books %}
             <tr>
-              <td><img src="{{ x['goodreads_book']['image'] }}" style="width: 60px;"></td>
+              <td><img src="{{ x['goodreads_book']['image'] }}" style="width: 100px;"></td>
               <td data-sort-value="{{ _(' '.join(x['goodreads_book']['title_parts'])) }}">
                 <a href="{{ x['goodreads_book']['link'] }}" target="_blank">
                   <span style="display: inline-block;">{{ x['goodreads_book']['title'] }}</span><br>

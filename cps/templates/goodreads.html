@@ -35,7 +35,7 @@
             <th data-type="numeric">Rating</th>
             <th data-type="numeric" data-breakpoints="xs">Reviews</th>
             <th data-type="numeric">Pages</th>
-            <th data-type="html" data-sortable="false" data-breakpoints="xs">DL?</th>
+            <th data-type="html" data-breakpoints="xs">DL?</th>
           </tr>
         </thead>
         <tbody>
@@ -51,7 +51,7 @@
               <td>{{ x['goodreads_book']['rating'] }}</td>
               <td>{{ x['goodreads_book']['ratings'] }}</td>
               <td>{{ x['goodreads_book']['pages'] }}</td>
-              <td style="font-size: 20pt;">
+              <td style="font-size: 20pt;" data-sort-value="{{ '1' if x['matching_books'][0] else '0' }}">
                 {% if x['matching_books'][0] %}
                 <a
                   href="{{ url_for('show_book', book_id=x['matching_books'][0].id) }}"

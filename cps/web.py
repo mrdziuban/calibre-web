@@ -1392,7 +1392,7 @@ def get_goodreads_books(token, user_id, shelf, page=1):
         } for x in xml.findall('books/book')
     ]
 
-    return books if empty(books) else books + get_goodreads_books(token, user_id, shelf, page + 1)
+    return books if len(books) == 0 else books + get_goodreads_books(token, user_id, shelf, page + 1)
 
 
 def matching_goodreads_books(goodreads_books, all_books):

@@ -1366,13 +1366,13 @@ def category(book_id, page):
                                  title=_(u"Category: %(name)s", name=name), sort=['category', 'asc'])
 
 
-def get_goodreads_books(token, user_id, shelf):
-    goodreads_url = "https://www.goodreads.com/review/list?key={0}&id={1}&shelf={2}&per_page=200".format(
-                        token, user_id, shelf)
+def get_goodreads_books(token, user_id, shelf, page=1):
+    goodreads_url = "https://www.goodreads.com/review/list?key={0}&id={1}&shelf={2}&per_page=200&page={3}".format(
+                        token, user_id, shelf, str(page))
     xml = ElementTree.fromstring(requests.get(goodreads_url).content)
 
     words_to_ignore = ['-', 'a', 'an', 'and', 'for', 'of', 'the']
-    return [
+    books = [
         {
             'id': x.find('id').text,
             'title': x.find('title').text,
@@ -1391,6 +1391,8 @@ def get_goodreads_books(token, user_id, shelf):
             'pages': x.find('num_pages').text
         } for x in xml.findall('books/book')
     ]
+
+    return books if empty(books) else books + get_goodreads_books(token, user_id, shelf, page + 1)
 
 
 def matching_goodreads_books(goodreads_books, all_books):

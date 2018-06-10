@@ -1366,26 +1366,15 @@ def category(book_id, page):
                                  title=_(u"Category: %(name)s", name=name), sort=['category', 'asc'])
 
 
-
-@app.route('/goodreads', defaults={'shelf': 'to-read'})
-@app.route('/goodreads/<shelf>')
-@login_required_if_no_ano
-def goodreads(shelf):
-    goodreads_token = os.environ.get("GOODREADS_TOKEN")
-    goodreads_user_id = current_user.goodreads_user_id
-
-    if goodreads_token is None or goodreads_user_id == '' or goodreads_user_id is None:
-        return abort(500)
-
-    all_books = db.session.query(db.Books).all()
-
+def get_goodreads_books(token, user_id, shelf):
     goodreads_url = "https://www.goodreads.com/review/list?key={0}&id={1}&shelf={2}&per_page=200".format(
                         goodreads_token, goodreads_user_id, shelf)
     xml = ElementTree.fromstring(requests.get(goodreads_url).content)
 
     words_to_ignore = ['-', 'a', 'an', 'and', 'for', 'of', 'the']
-    goodreads_books = [
+    return [
         {
+            'id': x.find('id').text,
             'title': x.find('title').text,
             'title_parts':
                 map(lambda x: x.lower(),
@@ -1403,14 +1392,52 @@ def goodreads(shelf):
         } for x in xml.findall('books/book')
     ]
 
-    books = [{
+
+def matching_goodreads_books(goodreads_books, all_books):
+    return [{
         'goodreads_book': b,
         'matching_books': filter(
             lambda book: all(part in book.title.lower() for part in b['title_parts']),
             all_books)
     } for b in goodreads_books]
 
+
+@app.route('/goodreads', defaults={'shelf': 'to-read'})
+@app.route('/goodreads/<shelf>')
+@login_required_if_no_ano
+def goodreads(shelf):
+    goodreads_token = os.environ.get("GOODREADS_TOKEN")
+    goodreads_user_id = current_user.goodreads_user_id
+
+    if goodreads_token is None or goodreads_user_id == '' or goodreads_user_id is None:
+        return abort(500)
+
+    books = matching_goodreads_books(
+        get_goodreads_books(goodreads_token, goodreads_user_id, shelf),
+        db.session.query(db.Books).all())
+
     return render_title_template('goodreads.html', books=books, title=_(u"Goodreads books: %(shelf)s", shelf=shelf))
+
+
+@app.route('/goodreads/diff/<shelf1>/<shelf2>')
+@login_required_if_no_ano
+def goodreads_diff(shelf1, shelf2):
+    goodreads_token = os.environ.get("GOODREADS_TOKEN")
+    goodreads_user_id = current_user.goodreads_user_id
+
+    if goodreads_token is None or goodreads_user_id == '' or goodreads_user_id is None:
+        return abort(500)
+
+    shelf1_books = get_goodreads_books(goodreads_token, goodreads_user_id, shelf1)
+    shelf2_books = get_goodreads_books(goodreads_token, goodreads_user_id, shelf2)
+    shelf2_ids = map(lambda b: b['id'], shelf2_books)
+
+    books = matching_goodreads_books(
+        [b for b in shelf1_books if b['id'] not in shelf2_ids],
+        db.session.query(db.Books).all())
+
+    return render_title_template('goodreads.html', books=books,
+                                 title=_(u"Goodreads diff: %(shelf1)s and %(shelf2)s", shelf1=shelf1, shelf2=shelf2))
 
 
 @app.route("/ajax/toggleread/<int:book_id>", methods=['POST'])

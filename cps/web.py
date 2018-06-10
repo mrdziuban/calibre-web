@@ -1368,7 +1368,7 @@ def category(book_id, page):
 
 def get_goodreads_books(token, user_id, shelf):
     goodreads_url = "https://www.goodreads.com/review/list?key={0}&id={1}&shelf={2}&per_page=200".format(
-                        goodreads_token, goodreads_user_id, shelf)
+                        token, user_id, shelf)
     xml = ElementTree.fromstring(requests.get(goodreads_url).content)
 
     words_to_ignore = ['-', 'a', 'an', 'and', 'for', 'of', 'the']

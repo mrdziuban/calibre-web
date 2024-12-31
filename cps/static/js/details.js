@@ -83,9 +83,10 @@ $("#have_read_cb").on("change", function() {
 
 $(function() {
     $("#archived_form").ajaxForm();
+    $("#rating_form").ajaxForm();
 });
 
-$("#archived_cb").on("change", function() {
+$("#archived_cb, #rating").on("change", function() {
     $(this).closest("form").submit();
 });
 

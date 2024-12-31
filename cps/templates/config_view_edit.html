@@ -26,7 +26,7 @@
         </div>
         <div class="form-group">
           <label for="config_books_per_page">{{_('Books per Page')}}</label>
-          <input type="number" min="1" max="200" class="form-control" name="config_books_per_page" id="config_books_per_page" value="{% if conf.config_books_per_page != None %}{{ conf.config_books_per_page }}{% endif %}" autocomplete="off">
+          <input type="number" min="1" class="form-control" name="config_books_per_page" id="config_books_per_page" value="{% if conf.config_books_per_page != None %}{{ conf.config_books_per_page }}{% endif %}" autocomplete="off">
         </div>
         <div class="form-group">
           <label for="config_random_books">{{_('No. of Random Books to Display')}}</label>

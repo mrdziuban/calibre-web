@@ -78,7 +78,7 @@ if ($("body.book").length > 0) {
             }
         }
     }
-    $("div.rating").insertBefore(".hr");
+    $(".rating").insertBefore(".hr");
     $("#remove-from-shelves").insertAfter(".hr");
     $(description).appendTo(".bookinfo")
 

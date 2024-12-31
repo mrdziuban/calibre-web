@@ -100,13 +100,6 @@ def edit_book(book_id):
     return do_edit_book(book_id)
 
 
-@editbook.route("/admin/book/rating/<int:book_id>", methods=['POST'])
-@login_required_if_no_ano
-@edit_required
-def edit_book_rating(book_id):
-    return do_edit_book_rating(book_id)
-
-
 @editbook.route("/upload", methods=["POST"])
 @login_required_if_no_ano
 @upload_required
@@ -427,7 +420,10 @@ def table_xchange_author_title():
     return ""
 
 
-def get_book_for_edit(book_id):
+def do_edit_book(book_id, upload_formats=None):
+    modify_date = False
+    edit_error = False
+
     # create the function for sorting...
     calibre_db.create_functions(config)
 
@@ -438,14 +434,6 @@ def get_book_for_edit(book_id):
               category="error")
         return redirect(url_for("web.index"))
 
-    return book
-
-
-def do_edit_book(book_id, upload_formats=None):
-    modify_date = False
-    edit_error = False
-
-    book = get_book_for_edit(book_id)
     to_save = request.form.to_dict()
 
     try:
@@ -562,33 +550,6 @@ def do_edit_book(book_id, upload_formats=None):
             return redirect(url_for('web.show_book', book_id=book.id))
         else:
             return render_edit_book(book_id)
-    except ValueError as e:
-        log.error_or_exception("Error: {}".format(e))
-        calibre_db.session.rollback()
-        flash(str(e), category="error")
-        return redirect(url_for('web.show_book', book_id=book.id))
-    except (OperationalError, IntegrityError, StaleDataError, InterfaceError) as e:
-        log.error_or_exception("Database error: {}".format(e))
-        calibre_db.session.rollback()
-        flash(_("Oops! Database Error: %(error)s.", error=e.orig if hasattr(e, "orig") else e), category="error")
-        return redirect(url_for('web.show_book', book_id=book.id))
-    except Exception as ex:
-        log.error_or_exception(ex)
-        calibre_db.session.rollback()
-        flash(_("Error editing book: {}".format(ex)), category="error")
-        return redirect(url_for('web.show_book', book_id=book.id))
-
-
-def do_edit_book_rating(book_id):
-    modify_date = False
-    book = get_book_for_edit(book_id)
-    to_save = request.form.to_dict()
-
-    try:
-        modify_date |= edit_book_ratings(to_save, book)
-        calibre_db.session.merge(book)
-        calibre_db.session.commit()
-        return ""
     except ValueError as e:
         log.error_or_exception("Error: {}".format(e))
         calibre_db.session.rollback()
